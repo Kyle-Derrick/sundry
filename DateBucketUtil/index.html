@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>test</title>
+    <link rel="stylesheet" type="text/css" href="lib/calendar/stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="lib/calendar/stylesheets/print.css" media="print">
+    <link rel="stylesheet" type="text/css" href="lib/calendar/stylesheets/simple-calendar.css">
+    <script type="text/javascript" src="lib/calendar/javascripts/simple-calendar.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/DateBucketUtil.js"></script>
+</head>
+<script>
+    let dateBucketUtil = new DateBucketUtil();
+    for (let i = 0; i < data.length; i++) {
+        dateBucketUtil.insert(data[i]);
+    }
+</script>
+<style>
+    .main{
+        width: 800px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+</style>
+<body>
+<div class="main">
+    <div id='calendar'></div>
+</div>
+<script>
+    new SimpleCalendar('#calendar', {
+        width: '800px',
+        height: '415px',
+        language: 'CH', //语言
+        timeRange: {
+            startYear: 1900,
+            endYear: 2049
+        },
+        dateBucketUtil: dateBucketUtil,
+        theme: {
+            changeAble: false,
+            weeks: {
+                backgroundColor: '#FBEC9C',
+                fontColor: '#4A4A4A',
+                fontSize: '20px',
+            },
+            days: {
+                backgroundColor: '#ffffff',
+                fontColor: '#565555',
+                fontSize: '24px'
+            },
+            todaycolor: 'orange',
+            activeSelectColor: 'orange',
+        }
+    });
+</script>
+</body>
+</html>
