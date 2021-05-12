@@ -10,12 +10,15 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Run {
     private final static String DEFAULT_OUTPUT_DIR = "out";
+
     public static void main(String[] args) {
         new Run().work(args);
     }
@@ -29,24 +32,33 @@ public class Run {
         File[] files = input.listFiles(File::isDirectory);
 
         ExecutorService pool = Executors.newCachedThreadPool();
+        AtomicInteger atomicInteger = new AtomicInteger();
         for (File file : files) {
             pool.execute(() -> {
-                task(file, input, output);
+                task(file, output, files.length, atomicInteger);
             });
         }
         pool.shutdown();
     }
 
-    private void task(File file, File input, File output){
+    private void task(File file, File output, int size, AtomicInteger atomicInteger){
         Vedio vedio = getVedio(file);
         File outFile = new File(output.getAbsolutePath().concat(File.separator).concat(StringUtils.fileNameFilter(vedio.getName())));
+        int tmp;
         try {
             FileUtils.copyFile(vedio.getFile(), outFile);
-//            System.out.println(outFile.getAbsolutePath());
-            System.out.print('.');
         } catch (Exception e) {
             System.err.println(ErrorMessage.COPY_FILE_ERROR.concat(outFile.getAbsolutePath()));
             e.printStackTrace();
+        }
+        System.out.printf("\rworking: %d/%d. ", (tmp = atomicInteger.incrementAndGet()), size);
+        if (tmp == size) {
+            System.out.println("\nFinished.");
+            System.out.printf("output location: %s\n", output.getAbsolutePath());
+            System.out.println("Please enter any key to exit... ");
+            try {
+                System.in.read();
+            } catch (IOException e) {}
         }
     }
 
@@ -76,7 +88,7 @@ public class Run {
         }
         if (Objects.isNull(outDir)) {
             try {
-                JSONObject jsonObject = JSON.parseObject(FileUtils.readFileToString(getDvi(input)));
+                JSONObject jsonObject = JSON.parseObject(FileUtils.readFileToString(getDvi(input), StandardCharsets.UTF_8));
                 String title = jsonObject.getString("Title");
                 outDir = path.getAbsolutePath()
                         .concat(File.separator)
@@ -123,7 +135,7 @@ public class Run {
             String fname = file.getName();
             if (fname.endsWith(".info")){
                 try {
-                    JSONObject jsonObject = JSON.parseObject(FileUtils.readFileToString(file));
+                    JSONObject jsonObject = JSON.parseObject(FileUtils.readFileToString(file, StandardCharsets.UTF_8));
                     String fn;
                     fn = jsonObject.getString("PartNo").concat("_").concat(jsonObject.getString("PartName"));
                     vedio.setFname(fn);
